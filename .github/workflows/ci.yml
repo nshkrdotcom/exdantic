@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: ['1.18.3']
+        otp: ['27.3.3']
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: ${{ matrix.elixir }}
+        otp-version: ${{ matrix.otp }}
+
+    - name: Restore dependencies cache
+      uses: actions/cache@v4
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+
+    - name: Install dependencies
+      run: mix deps.get
+      
+    - name: Run tests
+      run: mix test
+
+    - name: Check formatting
+      run: |
+        echo "Running mix format check..."
+        mix format --check-formatted || (echo "Format check failed!" && exit 1)
+      
+    - name: Run Credo
+      run: |
+        echo "Running Credo..."
+        mix credo --strict || (echo "Credo check failed!" && exit 1)
+      
+    - name: Run Dialyzer
+      run: |
+        echo "Running Dialyzer..."
+        mix dialyzer || (echo "Dialyzer check failed!" && exit 1)

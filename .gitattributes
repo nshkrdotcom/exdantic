@@ -1,0 +1,40 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Elixir files
+*.ex text eol=lf
+*.exs text eol=lf
+*.eex text eol=lf
+*.leex text eol=lf
+
+# Config files
+.formatter.exs text eol=lf
+.credo.exs text eol=lf
+.dialyzer_ignore.exs text eol=lf
+mix.exs text eol=lf
+mix.lock text eol=lf
+
+# Documentation
+*.md text eol=lf
+README* text eol=lf
+LICENSE text eol=lf
+CHANGELOG* text eol=lf
+
+# Git files
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# CI files
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
