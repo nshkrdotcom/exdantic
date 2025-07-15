@@ -682,6 +682,13 @@ mix run examples/basic_usage.exs
 
 **See the complete guide:** [`examples/README.md`](examples/README.md)
 
+## 📖 Additional Documentation
+
+- **[Production Error Handling Guide](PRODUCTION_ERROR_HANDLING_GUIDE.md)** - Complete guide to production-ready error handling, API responses, logging, monitoring, and recovery strategies
+- **[Advanced Features Guide](ADVANCED_FEATURES_GUIDE.md)** - Model validators, computed fields, enhanced runtime schemas
+- **[Getting Started Guide](GETTING_STARTED_GUIDE.md)** - Step-by-step introduction to core concepts
+- **[LLM Integration Guide](LLM_INTEGRATION_GUIDE.md)** - AI/ML use cases and optimization patterns
+
 ## 🤝 Contributing
 
 1. Fork the repository

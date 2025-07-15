@@ -4,10 +4,41 @@ This directory contains comprehensive examples showcasing all of Exdantic's feat
 
 ## Quick Start
 
-Run any example with:
+**Examples use two different execution methods:**
+
+### Mix Project Examples (11 examples)
+These use the compiled project and run with:
 ```bash
 mix run examples/<example_name>.exs
 ```
+
+**Mix project examples:**
+- `advanced_features.exs` - Complex validation patterns
+- `basic_usage.exs` - Core concepts and fundamentals  
+- `computed_fields.exs` - Derived fields and calculations
+- `conditional_recursive_validation.exs` - Complex validation scenarios
+- `custom_validation.exs` - Business logic validation
+- `llm_integration.exs` - LLM output validation
+- `llm_pipeline_orchestration.exs` - Multi-stage LLM pipelines
+- `model_validators.exs` - Cross-field validation
+- `readme_examples.exs` - README code verification
+- `root_schema.exs` - Non-dictionary validation
+
+### Standalone Script Examples (8 examples)
+These are self-contained and run with:
+```bash
+elixir examples/<example_name>.exs
+```
+
+**Standalone script examples:**
+- `advanced_config.exs` - Configuration patterns
+- `dspy_integration.exs` - Complete DSPy integration
+- `enhanced_validator.exs` - Universal validation interface  
+- `field_metadata_dspy.exs` - DSPy field metadata
+- `json_schema_resolver.exs` - Schema manipulation
+- `runtime_schema.exs` - Dynamic schema creation
+- `type_adapter.exs` - Runtime type validation
+- `wrapper_models.exs` - Single-field validation
 
 ## 📋 Complete Example Index
 
@@ -149,6 +180,7 @@ mix run examples/<example_name>.exs
 
 ### Quick Test - Run All Core Examples
 ```bash
+# Mix project examples
 mix run examples/basic_usage.exs
 mix run examples/advanced_features.exs
 mix run examples/custom_validation.exs
@@ -157,64 +189,71 @@ mix run examples/readme_examples.exs
 
 ### DSPy Development Workflow
 ```bash
-# Start with the big picture
-mix run examples/dspy_integration.exs
+# Start with the big picture (standalone script)
+elixir examples/dspy_integration.exs
 
-# Then explore specific features
-mix run examples/runtime_schema.exs
-mix run examples/type_adapter.exs
-mix run examples/wrapper_models.exs
-mix run examples/field_metadata_dspy.exs
+# Then explore specific features (standalone scripts)
+elixir examples/runtime_schema.exs
+elixir examples/type_adapter.exs
+elixir examples/wrapper_models.exs
+elixir examples/field_metadata_dspy.exs
 ```
 
 ### LLM Integration Workflow
 ```bash
-# Basic LLM integration
+# Basic LLM integration (mix project)
 mix run examples/llm_integration.exs
 
-# Advanced pipeline orchestration
+# Advanced pipeline orchestration (mix project)
 mix run examples/llm_pipeline_orchestration.exs
 
-# JSON schema optimization
-mix run examples/json_schema_resolver.exs
+# JSON schema optimization (standalone script)
+elixir examples/json_schema_resolver.exs
 
-# Root schema for non-dictionary outputs
+# Root schema for non-dictionary outputs (mix project)
 mix run examples/root_schema.exs
 ```
 
 ### Advanced Validation Patterns
 ```bash
-# Model validators for business logic
+# Model validators for business logic (mix project)
 mix run examples/model_validators.exs
 
-# Computed fields for derived data
+# Computed fields for derived data (mix project)
 mix run examples/computed_fields.exs
 
-# Conditional and recursive validation
+# Conditional and recursive validation (mix project)
 mix run examples/conditional_recursive_validation.exs
 
-# Enhanced validator for complex scenarios
-mix run examples/enhanced_validator.exs
+# Enhanced validator for complex scenarios (standalone script)
+elixir examples/enhanced_validator.exs
 ```
 
 ### Configuration and Optimization
 ```bash
-# Advanced configuration patterns
-mix run examples/advanced_config.exs
+# Advanced configuration patterns (standalone script)
+elixir examples/advanced_config.exs
 
-# JSON schema manipulation
-mix run examples/json_schema_resolver.exs
+# JSON schema manipulation (standalone script)
+elixir examples/json_schema_resolver.exs
 
-# Performance optimization
-mix run examples/type_adapter.exs | grep "Performance"
+# Performance optimization (standalone script)
+elixir examples/type_adapter.exs | grep "Performance"
 ```
 
 ### Run All Examples
 ```bash
-# Run all examples in sequence
-for example in examples/*.exs; do
-  echo "Running $(basename $example)..."
-  mix run "$example"
+# Run all examples (mix project examples)
+for example in advanced_features basic_usage computed_fields conditional_recursive_validation custom_validation llm_integration llm_pipeline_orchestration model_validators readme_examples root_schema; do
+  echo "Running $example.exs..."
+  mix run "examples/$example.exs"
+  echo "---"
+done
+
+# Run all examples (standalone scripts)
+for example in advanced_config dspy_integration enhanced_validator field_metadata_dspy json_schema_resolver runtime_schema type_adapter wrapper_models; do
+  echo "Running $example.exs..."
+  elixir "examples/$example.exs"
   echo "---"
 done
 ```
