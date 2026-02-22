@@ -136,7 +136,7 @@ defmodule Exdantic.Phase3TestRunner do
 
     IO.puts("✅ #{length(oks)}/#{length(tests)} tests passed in #{group_name}")
 
-    if length(errors) > 0 do
+    if errors != [] do
       IO.puts("❌ #{length(errors)} tests failed in #{group_name}")
 
       Enum.each(errors, fn {:error, {test, reason}} ->

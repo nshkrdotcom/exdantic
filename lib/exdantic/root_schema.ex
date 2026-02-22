@@ -69,7 +69,7 @@ defmodule Exdantic.RootSchema do
     end
 
     quote do
-      @root_type unquote(root_type)
+      defp __root_type__, do: unquote(root_type)
 
       @doc """
       Validates data against the root type definition.
@@ -88,7 +88,7 @@ defmodule Exdantic.RootSchema do
       @spec validate(term()) ::
               {:ok, term()} | {:error, Exdantic.Error.t() | [Exdantic.Error.t()]}
       def validate(data) do
-        Exdantic.RootSchema.validate_root(@root_type, data)
+        Exdantic.RootSchema.validate_root(__root_type__(), data)
       end
 
       @doc """
@@ -124,7 +124,7 @@ defmodule Exdantic.RootSchema do
           root_type = MyRootSchema.root_type()
       """
       @spec root_type() :: term()
-      def root_type, do: @root_type
+      def root_type, do: __root_type__()
 
       @doc """
       Generates a JSON Schema representation of the root type.
@@ -138,7 +138,7 @@ defmodule Exdantic.RootSchema do
       """
       @spec json_schema() :: map()
       def json_schema do
-        Exdantic.RootSchema.to_json_schema(@root_type)
+        Exdantic.RootSchema.to_json_schema(__root_type__())
       end
 
       @doc """
@@ -152,7 +152,7 @@ defmodule Exdantic.RootSchema do
           info = MyRootSchema.__schema__(:info)
       """
       @spec __schema__(atom()) :: term()
-      def __schema__(:root_type), do: @root_type
+      def __schema__(:root_type), do: __root_type__()
       def __schema__(:type), do: :root_schema
       def __schema__(:json_schema), do: json_schema()
       def __schema__(_), do: nil

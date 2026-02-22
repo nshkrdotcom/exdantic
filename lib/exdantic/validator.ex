@@ -57,7 +57,7 @@ defmodule Exdantic.Validator do
   defp has_computed_fields?(schema) do
     if function_exported?(schema, :__schema__, 1) do
       computed_fields = schema.__schema__(:computed_fields) || []
-      length(computed_fields) > 0
+      computed_fields != []
     else
       false
     end

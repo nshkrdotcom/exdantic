@@ -2196,21 +2196,21 @@ Whether you're building simple LLM-powered applications or complex multi-agent s
 
 ## 📚 Practical Examples
 
-For hands-on examples of all the LLM integration patterns covered in this guide, see the [`examples/`](../examples/) directory:
+For hands-on examples of all the LLM integration patterns covered in this guide, see the [`examples/`](examples/README.md) directory:
 
-- **LLM Integration Basics**: [`llm_integration.exs`](../examples/llm_integration.exs)
-- **DSPy Integration**: [`dspy_integration.exs`](../examples/dspy_integration.exs)
-- **Pipeline Orchestration**: [`llm_pipeline_orchestration.exs`](../examples/llm_pipeline_orchestration.exs)
-- **Field Metadata for DSPy**: [`field_metadata_dspy.exs`](../examples/field_metadata_dspy.exs)
-- **JSON Schema for LLMs**: [`json_schema_resolver.exs`](../examples/json_schema_resolver.exs)
-- **Runtime Schema Creation**: [`runtime_schema.exs`](../examples/runtime_schema.exs)
+- **LLM Integration Basics**: [`llm_integration.exs`](examples/llm_integration.exs)
+- **DSPy Integration**: [`dspy_integration.exs`](examples/dspy_integration.exs)
+- **Pipeline Orchestration**: [`llm_pipeline_orchestration.exs`](examples/llm_pipeline_orchestration.exs)
+- **Field Metadata for DSPy**: [`field_metadata_dspy.exs`](examples/field_metadata_dspy.exs)
+- **JSON Schema for LLMs**: [`json_schema_resolver.exs`](examples/json_schema_resolver.exs)
+- **Runtime Schema Creation**: [`runtime_schema.exs`](examples/runtime_schema.exs)
 
 Run any example with:
 ```bash
 mix run examples/<example_name>.exs
 ```
 
-See [`examples/README.md`](../examples/README.md) for the complete guide with detailed explanations and learning paths.
+See [`examples/README.md`](examples/README.md) for the complete guide with detailed explanations and learning paths.
 
 ---
 

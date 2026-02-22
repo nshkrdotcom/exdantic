@@ -126,7 +126,7 @@ defmodule Exdantic.EnhancedValidator do
       {:ok, ["a", "b"]}
   """
   @spec validate_wrapped(atom(), TypeAdapter.type_spec(), term(), enhanced_options()) ::
-          {:error, [Exdantic.Error.t()]}
+          {:ok, term()} | {:error, [Exdantic.Error.t()]}
   def validate_wrapped(field_name, type_spec, input, opts \\ []) do
     config = Keyword.get(opts, :config, Config.create())
 
@@ -142,10 +142,6 @@ defmodule Exdantic.EnhancedValidator do
 
         {:error, errors} when is_list(errors) ->
           {:error, errors}
-
-        other ->
-          {:error,
-           [Exdantic.Error.new([], :validation_error, "unexpected result: #{inspect(other)}")]}
       end
     rescue
       exception ->

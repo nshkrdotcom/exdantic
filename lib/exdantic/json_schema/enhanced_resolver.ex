@@ -763,7 +763,6 @@ defmodule Exdantic.JsonSchema.EnhancedResolver do
 
   defp determine_schema_type(%DynamicSchema{}), do: :dynamic_schema
   defp determine_schema_type(%EnhancedSchema{}), do: :enhanced_schema
-  defp determine_schema_type(_), do: :unknown
 
   @spec supports_struct?(term()) :: boolean()
   defp supports_struct?(schema_module) when is_atom(schema_module) do

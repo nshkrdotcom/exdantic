@@ -59,7 +59,9 @@ defmodule Exdantic.WrapperTest do
       field_meta = wrapper.fields[:email]
       assert field_meta.description == "Email address"
       assert field_meta.example == "user@example.com"
-      assert field_meta.type == {:type, :string, [format: ~r/@/]}
+      assert {:type, :string, constraints} = field_meta.type
+      assert %Regex{} = format = Keyword.fetch!(constraints, :format)
+      assert Regex.source(format) == "@"
     end
 
     test "generates unique wrapper names" do

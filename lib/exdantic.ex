@@ -150,6 +150,7 @@ defmodule Exdantic do
     define_struct? = Module.get_attribute(__CALLER__.module, :exdantic_define_struct)
     fields = Module.get_attribute(__CALLER__.module, :fields) || []
     computed_fields = Module.get_attribute(__CALLER__.module, :computed_fields) || []
+    fields_binary = fields |> __encode_schema_fields__() |> :erlang.term_to_binary()
 
     # Extract field names for struct definition
     field_names = Enum.map(fields, fn {name, _meta} -> name end)
@@ -267,7 +268,14 @@ defmodule Exdantic do
 
       # Define __schema__ functions (updated to include computed_fields)
       def __schema__(:description), do: @schema_description
-      def __schema__(:fields), do: @fields
+      # Regex constraints carry runtime references on newer Elixir/OTP versions.
+      # Keep field metadata in a serialized literal to avoid compile-time escaping failures.
+      def __schema__(:fields) do
+        unquote(fields_binary)
+        |> :erlang.binary_to_term()
+        |> Exdantic.__decode_schema_fields__()
+      end
+
       def __schema__(:validations), do: @validations
       def __schema__(:config), do: @config
       def __schema__(:model_validators), do: @model_validators || []
@@ -283,6 +291,65 @@ defmodule Exdantic do
       unquote(phase_6_functions())
     end
   end
+
+  @doc false
+  @spec __encode_schema_fields__(term()) :: term()
+  def __encode_schema_fields__(term), do: encode_schema_term(term)
+
+  @doc false
+  @spec __decode_schema_fields__(term()) :: term()
+  def __decode_schema_fields__(term), do: decode_schema_term(term)
+
+  @regex_marker :__exdantic_regex__
+
+  @spec encode_schema_term(term()) :: term()
+  defp encode_schema_term(%Regex{} = regex) do
+    {@regex_marker, Regex.source(regex), regex.opts}
+  end
+
+  defp encode_schema_term(%module{} = struct) do
+    struct
+    |> Map.from_struct()
+    |> Map.new(fn {key, value} -> {key, encode_schema_term(value)} end)
+    |> then(&struct(module, &1))
+  end
+
+  defp encode_schema_term(map) when is_map(map) do
+    Map.new(map, fn {key, value} -> {key, encode_schema_term(value)} end)
+  end
+
+  defp encode_schema_term(list) when is_list(list), do: Enum.map(list, &encode_schema_term/1)
+
+  defp encode_schema_term(tuple) when is_tuple(tuple) do
+    tuple |> Tuple.to_list() |> Enum.map(&encode_schema_term/1) |> List.to_tuple()
+  end
+
+  defp encode_schema_term(other), do: other
+
+  @spec decode_schema_term(term()) :: term()
+  defp decode_schema_term({@regex_marker, source, opts})
+       when is_binary(source) and is_list(opts) do
+    Regex.compile!(source, opts)
+  end
+
+  defp decode_schema_term(%module{} = struct) do
+    struct
+    |> Map.from_struct()
+    |> Map.new(fn {key, value} -> {key, decode_schema_term(value)} end)
+    |> then(&struct(module, &1))
+  end
+
+  defp decode_schema_term(map) when is_map(map) do
+    Map.new(map, fn {key, value} -> {key, decode_schema_term(value)} end)
+  end
+
+  defp decode_schema_term(list) when is_list(list), do: Enum.map(list, &decode_schema_term/1)
+
+  defp decode_schema_term(tuple) when is_tuple(tuple) do
+    tuple |> Tuple.to_list() |> Enum.map(&decode_schema_term/1) |> List.to_tuple()
+  end
+
+  defp decode_schema_term(other), do: other
 
   # Private helper functions for generating code blocks
 
@@ -501,8 +568,8 @@ defmodule Exdantic do
 
       defp get_feature_flags do
         has_struct = __struct_enabled__?()
-        has_validators = length(__schema__(:model_validators) || []) > 0
-        has_computed = length(__schema__(:computed_fields) || []) > 0
+        has_validators = (__schema__(:model_validators) || []) != []
+        has_computed = (__schema__(:computed_fields) || []) != []
         {has_struct, has_validators, has_computed}
       end
 

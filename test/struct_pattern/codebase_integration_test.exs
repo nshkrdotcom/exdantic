@@ -102,7 +102,7 @@ defmodule Exdantic.CodebaseIntegrationTest do
       # Handle both single error and list of errors
       errors_list = if is_list(errors), do: errors, else: [errors]
       assert is_list(errors_list)
-      assert length(errors_list) > 0
+      assert errors_list != []
 
       error = hd(errors_list)
       assert %Exdantic.Error{} = error

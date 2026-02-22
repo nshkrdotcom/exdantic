@@ -146,13 +146,31 @@ defmodule Exdantic.Runtime do
   All existing tests continue to pass, ensuring backward compatibility.
   """
 
-  alias Exdantic.Runtime.{DynamicSchema, EnhancedSchema}
-  alias Exdantic.{FieldMeta, Validator}
+  alias Exdantic.FieldMeta
   alias Exdantic.JsonSchema.{ReferenceStore, Resolver, TypeMapper}
+  alias Exdantic.Runtime.{DynamicSchema, EnhancedSchema}
+  alias Exdantic.Validator
 
   @type field_definition :: {atom(), type_spec()} | {atom(), type_spec(), keyword()}
   @type type_spec :: Exdantic.Types.type_definition() | atom() | module()
-  @type schema_option :: {:title, String.t()} | {:description, String.t()} | {:strict, boolean()}
+  @type schema_option ::
+          {:title, String.t()}
+          | {:description, String.t()}
+          | {:strict, boolean()}
+          | {:name, String.t()}
+
+  @constraint_keys [
+    :min_length,
+    :max_length,
+    :min_items,
+    :max_items,
+    :gt,
+    :lt,
+    :gteq,
+    :lteq,
+    :format,
+    :choices
+  ]
 
   @doc """
   Creates a schema at runtime from field definitions.
@@ -343,7 +361,7 @@ defmodule Exdantic.Runtime do
       ...> )
       %Exdantic.Runtime.EnhancedSchema{...}
   """
-  @spec create_enhanced_schema([field_definition()], [schema_option()]) :: EnhancedSchema.t()
+  @spec create_enhanced_schema([field_definition()], keyword()) :: EnhancedSchema.t()
   def create_enhanced_schema(field_definitions, opts \\ []) do
     EnhancedSchema.create(field_definitions, opts)
   end
@@ -411,7 +429,7 @@ defmodule Exdantic.Runtime do
       ...>   dspy_compatible: true
       ...> )
   """
-  @spec create_enhanced_schema_v6([field_definition()], [schema_option()]) :: EnhancedSchema.t()
+  @spec create_enhanced_schema_v6([field_definition()], keyword()) :: EnhancedSchema.t()
   def create_enhanced_schema_v6(field_definitions, opts \\ []) do
     auto_optimize = Keyword.get(opts, :auto_optimize_for_provider)
     include_metadata = Keyword.get(opts, :include_validation_metadata, false)
@@ -827,22 +845,8 @@ defmodule Exdantic.Runtime do
 
   @spec extract_constraints(keyword()) :: [term()]
   defp extract_constraints(opts) do
-    constraint_keys =
-      MapSet.new([
-        :min_length,
-        :max_length,
-        :min_items,
-        :max_items,
-        :gt,
-        :lt,
-        :gteq,
-        :lteq,
-        :format,
-        :choices
-      ])
-
     Enum.filter(opts, fn {key, _value} ->
-      MapSet.member?(constraint_keys, key)
+      key in @constraint_keys
     end)
   end
 

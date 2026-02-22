@@ -8,6 +8,13 @@ defmodule Exdantic.JsonSchema.Resolver do
   """
 
   @type schema :: map()
+  @type resolver_context :: %{
+          definitions: %{optional(String.t()) => schema()},
+          max_depth: non_neg_integer(),
+          preserve_titles: boolean(),
+          preserve_descriptions: boolean(),
+          visited: %{optional(String.t()) => true}
+        }
   @type resolution_options :: [
           max_depth: non_neg_integer(),
           preserve_titles: boolean(),
@@ -61,7 +68,7 @@ defmodule Exdantic.JsonSchema.Resolver do
       max_depth: max_depth,
       preserve_titles: preserve_titles,
       preserve_descriptions: preserve_descriptions,
-      visited: MapSet.new()
+      visited: %{}
     }
 
     resolve_schema_part(schema, context, 0)
@@ -205,7 +212,7 @@ defmodule Exdantic.JsonSchema.Resolver do
     |> Map.merge(Map.get(schema, "$defs", %{}))
   end
 
-  @spec resolve_schema_part(schema(), map(), non_neg_integer()) :: schema()
+  @spec resolve_schema_part(schema(), resolver_context(), non_neg_integer()) :: schema()
   defp resolve_schema_part(schema, context, depth) when depth > context.max_depth do
     # Prevent infinite recursion
     schema
@@ -275,21 +282,24 @@ defmodule Exdantic.JsonSchema.Resolver do
     schema
   end
 
-  @spec resolve_reference(String.t(), map(), non_neg_integer()) ::
+  @spec resolve_reference(String.t(), resolver_context(), non_neg_integer()) ::
           {:ok, schema()} | {:error, String.t()}
   defp resolve_reference("#/definitions/" <> def_name, context, depth) do
     case Map.get(context.definitions, def_name) do
       nil ->
         {:error, "Definition not found: #{def_name}"}
 
-      definition ->
-        if MapSet.member?(context.visited, def_name) do
+      definition when is_map(definition) ->
+        if Map.has_key?(context.visited, def_name) do
           {:error, "Circular reference detected: #{def_name}"}
         else
-          visited_context = %{context | visited: MapSet.put(context.visited, def_name)}
+          visited_context = %{context | visited: Map.put(context.visited, def_name, true)}
           resolved = resolve_schema_part(definition, visited_context, depth)
           {:ok, resolved}
         end
+
+      _other ->
+        {:error, "Invalid definition for #{def_name}"}
     end
   end
 

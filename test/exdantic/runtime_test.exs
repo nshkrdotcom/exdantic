@@ -47,7 +47,10 @@ defmodule Exdantic.RuntimeTest do
 
       schema = Runtime.create_schema(fields)
 
-      assert schema.fields[:email].type == {:type, :string, [format: ~r/@/, min_length: 5]}
+      assert {:type, :string, constraints} = schema.fields[:email].type
+      assert Keyword.get(constraints, :min_length) == 5
+      assert %Regex{} = format = Keyword.fetch!(constraints, :format)
+      assert Regex.source(format) == "@"
       assert schema.fields[:score].type == {:type, :integer, [gt: 0, lteq: 100]}
     end
 

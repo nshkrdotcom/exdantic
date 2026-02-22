@@ -17,8 +17,8 @@ defmodule Exdantic.Settings do
   - Exploded nested env keys do not address arrays in v1 (`APP_ITEMS__0` is ignored).
   """
 
-  alias Exdantic.{StructValidator, ValidationError}
   alias Exdantic.Settings.{DeepMerge, Env, Loader, NormalizeKeys}
+  alias Exdantic.{StructValidator, ValidationError}
 
   @type load_option ::
           {:input, map()}

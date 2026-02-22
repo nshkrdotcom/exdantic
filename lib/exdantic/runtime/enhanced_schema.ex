@@ -9,9 +9,9 @@ defmodule Exdantic.Runtime.EnhancedSchema do
   - JSON Schema generation with enhanced metadata
   """
 
+  alias Exdantic.{ComputedFieldMeta, Error}
   alias Exdantic.JsonSchema.TypeMapper
   alias Exdantic.Runtime.DynamicSchema
-  alias Exdantic.{ComputedFieldMeta, Error}
 
   @enforce_keys [:base_schema, :model_validators, :computed_fields]
   defstruct [

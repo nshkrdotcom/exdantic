@@ -28,9 +28,9 @@ defmodule Exdantic.TypeTest do
 
   describe "custom type definition" do
     test "defines type correctly" do
-      # Update assertion
-      assert TestEmail.type_definition() ==
-               {:type, :string, [format: ~r/^[^\s]+@[^\s]+$/]}
+      assert {:type, :string, constraints} = TestEmail.type_definition()
+      assert %Regex{} = format = Keyword.fetch!(constraints, :format)
+      assert Regex.source(format) == "^[^\\s]+@[^\\s]+$"
     end
 
     test "generates correct JSON schema" do

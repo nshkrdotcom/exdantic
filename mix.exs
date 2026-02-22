@@ -1,7 +1,7 @@
 defmodule Exdantic.MixProject do
   use Mix.Project
   @source_url "https://github.com/nshkrdotcom/exdantic"
-  @version "0.0.2"
+  @version "0.1.0"
 
   def project do
     [
@@ -43,7 +43,7 @@ defmodule Exdantic.MixProject do
       {:excoveralls, "~> 0.18.5", only: :test},
       {:credo, "~> 1.7.12", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.5", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.38.2", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.40.0", only: :dev, runtime: false}
     ]
   end
 
@@ -74,7 +74,11 @@ defmodule Exdantic.MixProject do
       extras: [
         {"README.md", [filename: "readme"]},
         "LICENSE",
-        {"examples/README.md", [filename: "examples"]}
+        {"examples/README.md", [filename: "examples"]},
+        "GETTING_STARTED_GUIDE.md",
+        "ADVANCED_FEATURES_GUIDE.md",
+        "LLM_INTEGRATION_GUIDE.md",
+        "PRODUCTION_ERROR_HANDLING_GUIDE.md"
       ]
     ]
   end
@@ -87,8 +91,7 @@ defmodule Exdantic.MixProject do
         :underspecs,
         :unknown,
         :unmatched_returns
-      ],
-      ignore_warnings: ".dialyzer_ignore.exs"
+      ]
     ]
   end
 end

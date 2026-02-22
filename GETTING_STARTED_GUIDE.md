@@ -9,7 +9,7 @@ Add exdantic to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:exdantic, "~> 0.0.1"}
+    {:exdantic, "~> 0.1.0"}
   ]
 end
 ```

@@ -161,7 +161,7 @@ defmodule Exdantic.DSPyUsageTest do
       }
 
       assert {:error, errors} = Validator.validate(template_vars_type, invalid_vars)
-      assert length(errors) >= 1
+      assert List.wrap(errors) != []
     end
 
     test "validates nested example structures for few-shot learning" do
