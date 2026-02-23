@@ -7,7 +7,7 @@ defmodule Exdantic.JsonSchema.Resolver do
   LLM providers (OpenAI, Anthropic, etc.).
   """
 
-  @type schema :: map()
+  @type schema :: map() | boolean()
   @type resolver_context :: %{
           definitions: %{optional(String.t()) => schema()},
           max_depth: non_neg_integer(),
@@ -56,7 +56,10 @@ defmodule Exdantic.JsonSchema.Resolver do
       }
   """
   @spec resolve_references(schema(), resolution_options()) :: schema()
-  def resolve_references(schema, opts \\ []) do
+  def resolve_references(schema, opts \\ [])
+  def resolve_references(schema, _opts) when is_boolean(schema), do: schema
+
+  def resolve_references(schema, opts) when is_map(schema) do
     max_depth = Keyword.get(opts, :max_depth, 10)
     preserve_titles = Keyword.get(opts, :preserve_titles, true)
     preserve_descriptions = Keyword.get(opts, :preserve_descriptions, true)
@@ -118,7 +121,10 @@ defmodule Exdantic.JsonSchema.Resolver do
       }
   """
   @spec flatten_schema(schema(), keyword()) :: schema()
-  def flatten_schema(schema, opts \\ []) do
+  def flatten_schema(schema, opts \\ [])
+  def flatten_schema(schema, _opts) when is_boolean(schema), do: schema
+
+  def flatten_schema(schema, opts) when is_map(schema) do
     max_depth = Keyword.get(opts, :max_depth, 5)
     inline_simple_refs = Keyword.get(opts, :inline_simple_refs, true)
     preserve_complex_refs = Keyword.get(opts, :preserve_complex_refs, false)
@@ -206,10 +212,11 @@ defmodule Exdantic.JsonSchema.Resolver do
 
   # Private helper functions
 
-  @spec extract_definitions(schema()) :: map()
-  defp extract_definitions(schema) do
-    Map.get(schema, "definitions", %{})
-    |> Map.merge(Map.get(schema, "$defs", %{}))
+  @spec extract_definitions(map()) :: map()
+  defp extract_definitions(schema) when is_map(schema) do
+    definitions = schema |> Map.get("definitions", %{}) |> ensure_map()
+    defs = schema |> Map.get("$defs", %{}) |> ensure_map()
+    Map.merge(definitions, defs)
   end
 
   @spec resolve_schema_part(schema(), resolver_context(), non_neg_integer()) :: schema()
@@ -289,7 +296,7 @@ defmodule Exdantic.JsonSchema.Resolver do
       nil ->
         {:error, "Definition not found: #{def_name}"}
 
-      definition when is_map(definition) ->
+      definition when is_map(definition) or is_boolean(definition) ->
         if Map.has_key?(context.visited, def_name) do
           {:error, "Circular reference detected: #{def_name}"}
         else
@@ -311,10 +318,43 @@ defmodule Exdantic.JsonSchema.Resolver do
     {:error, "Unsupported reference format: #{ref}"}
   end
 
-  defp merge_schema_properties(resolved, additional_props, context) do
+  defp merge_schema_properties(resolved, additional_props, context) when is_map(resolved) do
     resolved
     |> merge_if_preserve_titles(additional_props, context)
     |> merge_if_preserve_descriptions(additional_props, context)
+  end
+
+  defp merge_schema_properties(resolved, additional_props, context) do
+    metadata = build_preserved_metadata(additional_props, context)
+
+    if map_size(metadata) == 0 do
+      resolved
+    else
+      %{"allOf" => [resolved, metadata]}
+    end
+  end
+
+  defp build_preserved_metadata(additional_props, context) do
+    metadata = %{}
+
+    metadata =
+      if context.preserve_titles do
+        case Map.fetch(additional_props, "title") do
+          {:ok, title} -> Map.put(metadata, "title", title)
+          :error -> metadata
+        end
+      else
+        metadata
+      end
+
+    if context.preserve_descriptions do
+      case Map.fetch(additional_props, "description") do
+        {:ok, description} -> Map.put(metadata, "description", description)
+        :error -> metadata
+      end
+    else
+      metadata
+    end
   end
 
   defp merge_if_preserve_titles(schema, additional_props, context) do
@@ -334,11 +374,16 @@ defmodule Exdantic.JsonSchema.Resolver do
   end
 
   @spec remove_definitions(schema()) :: schema()
-  defp remove_definitions(schema) do
+  defp remove_definitions(schema) when is_boolean(schema), do: schema
+
+  defp remove_definitions(schema) when is_map(schema) do
     schema
     |> Map.delete("definitions")
     |> Map.delete("$defs")
   end
+
+  defp ensure_map(value) when is_map(value), do: value
+  defp ensure_map(_value), do: %{}
 
   @spec inline_simple_types(schema(), boolean()) :: schema()
   defp inline_simple_types(

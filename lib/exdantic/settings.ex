@@ -34,6 +34,7 @@ defmodule Exdantic.Settings do
           {:ok, map() | struct()} | {:error, [Exdantic.Error.t()]}
   def load(schema_module, opts \\ []) when is_atom(schema_module) do
     with :ok <- ensure_schema_module(schema_module),
+         {:ok, input} <- resolve_input(opts),
          {:ok, env_map} <-
            Env.normalize_env_map(
              resolve_env(opts),
@@ -41,8 +42,6 @@ defmodule Exdantic.Settings do
            ),
          {:ok, env_values} <-
            Loader.load_env_values(schema_module, env_map, opts) do
-      input = Keyword.get(opts, :input, %{})
-
       merged =
         env_values
         |> DeepMerge.deep_merge(input)
@@ -70,6 +69,23 @@ defmodule Exdantic.Settings do
     case Keyword.get(opts, :env, System.get_env()) do
       map when is_map(map) -> map
       _ -> %{}
+    end
+  end
+
+  defp resolve_input(opts) do
+    case Keyword.get(opts, :input, %{}) do
+      input when is_map(input) ->
+        {:ok, input}
+
+      other ->
+        {:error,
+         [
+           Exdantic.Error.new(
+             [],
+             :type,
+             "expected :input to be a map, got #{inspect(other)}"
+           )
+         ]}
     end
   end
 

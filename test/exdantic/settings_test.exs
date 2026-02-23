@@ -52,6 +52,14 @@ defmodule Exdantic.SettingsTest do
     end
   end
 
+  defmodule InputSchema do
+    use Exdantic
+
+    schema do
+      field(:port, :integer, default: 4000)
+    end
+  end
+
   test "override key is absolute and wins over derived prefixed key" do
     env = %{
       "APP_DB_URL" => "from-derived",
@@ -83,6 +91,23 @@ defmodule Exdantic.SettingsTest do
              )
 
     assert result.database.host == "a"
+    assert result.database.pool_size == 10
+  end
+
+  test "single underscore delimiter supports exploded nested fields with underscore names" do
+    env = %{
+      "APP_DATABASE_HOST" => "localhost",
+      "APP_DATABASE_POOL_SIZE" => "10"
+    }
+
+    assert {:ok, result} =
+             Settings.load(NestedSettingsSchema,
+               env: env,
+               env_prefix: "APP_",
+               env_nested_delimiter: "_"
+             )
+
+    assert result.database.host == "localhost"
     assert result.database.pool_size == 10
   end
 
@@ -122,5 +147,11 @@ defmodule Exdantic.SettingsTest do
 
     assert {:error, errors} = Settings.load(ArraySchema, env: %{"TAGS" => "not-json"})
     assert Enum.any?(errors, &(&1.code == :env_json))
+  end
+
+  test "returns type error when input option is not a map" do
+    assert {:error, [error]} = Settings.load(InputSchema, env: %{}, input: 123)
+    assert error.code == :type
+    assert error.message == "expected :input to be a map, got 123"
   end
 end

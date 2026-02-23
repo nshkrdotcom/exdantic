@@ -67,6 +67,7 @@ bash examples/run_all.sh --fail-fast
 | `readme_examples.exs` | Verifies README snippets by executing them as a consistency check | `mix run` |
 | `root_schema.exs` | Root-level validation for non-map data (arrays, unions, primitives) | `mix run` |
 | `runtime_schema.exs` | Dynamic schema creation and validation at runtime | `elixir` |
+| `settings_loader.exs` | End-to-end environment settings loading: prefixes, overrides, nested exploded keys, and error handling | `mix run` |
 | `type_adapter.exs` | TypeAdapter-based runtime validation, coercion, dumping, and batch use | `elixir` |
 | `wrapper_models.exs` | Wrapper model patterns for single-field validation and reuse | `elixir` |
 
@@ -89,7 +90,8 @@ bash examples/run_all.sh --fail-fast
 15. `field_metadata_dspy.exs`
 16. `conditional_recursive_validation.exs`
 17. `advanced_config.exs`
-18. `readme_examples.exs`
+18. `settings_loader.exs`
+19. `readme_examples.exs`
 
 ## Notes
 

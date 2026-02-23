@@ -86,6 +86,15 @@ defmodule Exdantic.Settings.Decode do
     end
   end
 
+  @spec resolve_nested_prefix(term(), String.t(), keyword(), String.t()) ::
+          {:ok, atom(), term(), String.t()} | :error
+  def resolve_nested_prefix(type, tail, opts, delimiter)
+      when is_binary(tail) and is_binary(delimiter) do
+    with {:ok, fields} <- extract_nested_fields(type) do
+      match_field_prefix(fields, tail, opts, delimiter)
+    end
+  end
+
   @spec decode_scalar(term(), String.t(), [atom() | String.t()], keyword()) :: decode_result()
   def decode_scalar({:type, :string, _}, value, _path, _opts), do: {:ok, value}
 
@@ -238,6 +247,36 @@ defmodule Exdantic.Settings.Decode do
       if comparer.(expected, segment), do: {:ok, name, meta}, else: false
     end)
   end
+
+  defp match_field_prefix(fields, tail, opts, delimiter) do
+    case_sensitive = Keyword.get(opts, :case_sensitive, false)
+    normalized_tail = normalize_segment(tail, case_sensitive)
+    normalized_delimiter = normalize_segment(delimiter, case_sensitive)
+
+    fields
+    |> Enum.sort_by(fn {name, _meta} -> byte_size(Keys.segment_to_env(name)) end, :desc)
+    |> Enum.find_value(:error, fn {name, meta} ->
+      expected = Keys.segment_to_env(name)
+      normalized_expected = normalize_segment(expected, case_sensitive)
+
+      cond do
+        normalized_tail == normalized_expected ->
+          {:ok, name, meta.type, ""}
+
+        String.starts_with?(normalized_tail, normalized_expected <> normalized_delimiter) ->
+          rest_start = byte_size(expected) + byte_size(delimiter)
+          rest_length = byte_size(tail) - rest_start
+          rest = binary_part(tail, rest_start, rest_length)
+          {:ok, name, meta.type, rest}
+
+        true ->
+          false
+      end
+    end)
+  end
+
+  defp normalize_segment(value, true), do: value
+  defp normalize_segment(value, false), do: String.upcase(value)
 
   defp schema_module?(module) when is_atom(module) do
     Code.ensure_loaded?(module) and function_exported?(module, :__schema__, 1)

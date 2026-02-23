@@ -128,15 +128,17 @@ defmodule Exdantic.Settings.Loader do
   end
 
   defp decode_single_exploded_entry(type, tail_key, value, path, opts, delimiter) do
-    parts =
+    normalized_tail =
       tail_key
       |> String.split(delimiter)
       |> Enum.reject(&(&1 == ""))
+      |> Enum.join(delimiter)
 
-    if parts == [] do
+    if normalized_tail == "" do
       {:ok, :skip}
     else
-      with {:ok, field_path_parts, leaf_type} <- resolve_exploded_path(type, parts, opts),
+      with {:ok, field_path_parts, leaf_type} <-
+             resolve_exploded_path(type, normalized_tail, opts, delimiter),
            {:ok, decoded} <-
              Decode.decode_exploded_leaf(leaf_type, value, path ++ field_path_parts, opts) do
         {:ok, {field_path_parts, decoded}}
@@ -147,27 +149,27 @@ defmodule Exdantic.Settings.Loader do
     end
   end
 
-  defp resolve_exploded_path(type, parts, opts), do: resolve_exploded_path(type, parts, opts, [])
+  defp resolve_exploded_path(type, tail, opts, delimiter),
+    do: resolve_exploded_path(type, tail, opts, delimiter, [])
 
-  defp resolve_exploded_path(_type, [], _opts, _acc), do: :error
+  defp resolve_exploded_path(_type, "", _opts, _delimiter, _acc), do: :error
 
-  defp resolve_exploded_path(type, [segment], opts, acc) do
-    case Decode.resolve_nested_field_type(type, segment, opts) do
-      {:ok, name, leaf_type} ->
+  defp resolve_exploded_path(type, tail, opts, delimiter, acc) do
+    case Decode.resolve_nested_prefix(type, tail, opts, delimiter) do
+      {:ok, name, leaf_type, ""} ->
         {:ok, acc ++ [Atom.to_string(name)], leaf_type}
 
-      :error ->
-        :error
-    end
-  end
-
-  defp resolve_exploded_path(type, [segment | rest], opts, acc) do
-    case Decode.resolve_nested_field_type(type, segment, opts) do
-      {:ok, name, next_type} ->
+      {:ok, name, next_type, rest_tail} ->
         if match?({:array, _, _}, next_type) do
           :error
         else
-          resolve_exploded_path(next_type, rest, opts, acc ++ [Atom.to_string(name)])
+          resolve_exploded_path(
+            next_type,
+            rest_tail,
+            opts,
+            delimiter,
+            acc ++ [Atom.to_string(name)]
+          )
         end
 
       :error ->

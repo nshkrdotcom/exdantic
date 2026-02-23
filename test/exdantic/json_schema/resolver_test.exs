@@ -67,6 +67,29 @@ defmodule Exdantic.JsonSchema.ResolverTest do
       resolved = Resolver.resolve_references(schema, max_depth: 2)
       assert is_map(resolved)
     end
+
+    test "resolves boolean schemas referenced from definitions and $defs" do
+      schema = %{
+        "type" => "object",
+        "properties" => %{
+          "allow_anything" => %{"$ref" => "#/definitions/AllowAll"},
+          "allow_nothing" => %{"$ref" => "#/$defs/AllowNone"}
+        },
+        "definitions" => %{
+          "AllowAll" => true
+        },
+        "$defs" => %{
+          "AllowNone" => false
+        }
+      }
+
+      resolved = Resolver.resolve_references(schema)
+
+      refute Map.has_key?(resolved, "definitions")
+      refute Map.has_key?(resolved, "$defs")
+      assert get_in(resolved, ["properties", "allow_anything"]) == true
+      assert get_in(resolved, ["properties", "allow_nothing"]) == false
+    end
   end
 
   describe "enforce_structured_output/2" do
