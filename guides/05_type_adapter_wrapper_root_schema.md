@@ -99,8 +99,18 @@ wrappers = Exdantic.Wrapper.create_multiple_wrappers([
 - map with atom key
 - map with string key
 
+### Reusable wrapper factory
+
+`create_wrapper_factory/2` returns a function that creates pre-configured wrappers:
+
+```elixir
+factory = Exdantic.Wrapper.create_wrapper_factory(:integer, constraints: [gt: 0], coerce: true)
+wrapper = factory.(:score)
+```
+
 Wrapper helpers:
 
+- `create_wrapper_factory/2`
 - `to_json_schema/2`
 - `unwrap_result/2`
 - `wrapper_schema?/1`

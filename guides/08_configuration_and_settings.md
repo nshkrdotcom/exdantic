@@ -25,7 +25,9 @@ Key fields:
 - `frozen`: immutable config guard
 - `validate_assignment`
 - `case_sensitive`
+- `error_format`: `:detailed | :simple | :minimal`
 - `use_enum_values`
+- `allow_population_by_field_name`: support field name aliases (default `true`)
 - `max_anyof_union_len`
 - optional generator functions (`title_generator`, `description_generator`)
 

@@ -149,11 +149,14 @@ email_type =
 Key helpers:
 
 - `Types.string/0`, `Types.integer/0`, `Types.float/0`, `Types.boolean/0`
+- `Types.type/1` generic constructor (e.g., `Types.type(:string)`)
 - `Types.array/1`, `Types.map/2`, `Types.object/1`, `Types.union/1`, `Types.tuple/1`
 - `Types.ref/1`, `Types.normalize_type/1`
 - `Types.with_constraints/2`
 - `Types.with_error_message/3`, `Types.with_error_messages/2`
 - `Types.with_validator/2` for custom value-level checks
+- `Types.validate/2` for direct type checking (e.g., `Types.validate(:string, value)`)
+- `Types.coerce/2` for standalone type coercion (e.g., `Types.coerce(:integer, "123")`)
 
 ## Custom Type Modules with `Exdantic.Type`
 
@@ -179,6 +182,11 @@ defmodule MyApp.Types.Email do
   end
 end
 ```
+
+Optional callbacks:
+
+- `coerce_rule/0` — returns a coercion function or `{module, function}` tuple (default `nil`)
+- `custom_rules/0` — returns a list of additional validation function names defined in the module (default `[]`)
 
 Then use it as a field type:
 

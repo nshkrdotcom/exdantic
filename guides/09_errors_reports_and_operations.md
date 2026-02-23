@@ -66,22 +66,15 @@ Type-only:
 
 ## Reporting APIs
 
-## Quick report
+### Quick report
 
 ```elixir
 report = Exdantic.EnhancedValidator.validation_report(target, input)
 ```
 
-Includes:
+Returns a lightweight summary: validation result, generated JSON Schema, target and input analysis, timing metrics, and config summary.
 
-- validation result
-- generated JSON Schema
-- target analysis
-- input analysis
-- timing metrics
-- config summary
-
-## Comprehensive report
+### Comprehensive report
 
 ```elixir
 report =
