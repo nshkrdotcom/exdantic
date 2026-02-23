@@ -40,7 +40,10 @@ Codes vary by operation, but common categories include:
 - `:model_validation`
 - `:computed_field`
 - `:computed_field_type`
-- env-related settings codes like `:env_cast`, `:env_json`, `:env_key_conflict`
+- env-related settings codes:
+  - `:env_cast` — scalar value could not be parsed (e.g., `"abc"` for an integer field)
+  - `:env_json` — structured value could not be decoded as JSON (e.g., malformed array string)
+  - `:env_key_conflict` — case-insensitive env key collision detected (e.g., `app_port` and `APP_PORT` both present)
 
 ## Validation Entry Points
 

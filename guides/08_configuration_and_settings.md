@@ -138,24 +138,95 @@ config = Exdantic.Config.create(strict: true, coercion: :safe)
 - `allow_atoms: false | :existing`
 - `bool_numeric: boolean()`
 
+## Field-Level Env Override
+
+A field can declare an absolute env key that bypasses prefix derivation:
+
+```elixir
+schema do
+  field :db_url, :string, required: true, extra: %{"env" => "DATABASE_URL"}
+end
+```
+
+When both the override key and the derived key exist in the environment, the override wins. The prefix is **not** applied to the override key.
+
 ## Env Decoding Behavior
 
-- Scalar env values are decoded by expected type (`integer`, `float`, `boolean`, etc.)
-- Structured types (`array`, maps, objects, refs) use JSON decoding for top-level values
-- Union decoding is conservative for structured union members
-- Field override via `extra: %{"env" => "CUSTOM_KEY"}` is supported
-- Nested exploded env keys are supported for nested maps/objects (arrays are intentionally limited)
+Scalar types are decoded from their string env representation:
+
+- `:string` — passed through as-is
+- `:integer` — parsed with `Integer.parse/1`; must consume entire string
+- `:float` — parsed with `Float.parse/1`; must consume entire string
+- `:boolean` — accepts `"true"` / `"false"` (case-insensitive); when `bool_numeric: true` (default), also accepts `"1"` / `"0"`
+- `:atom` — disabled by default; set `allow_atoms: :existing` to allow `String.to_existing_atom/1`
+- `:any` — passed through as-is
+
+Structured types (`{:array, _}`, `{:map, _, _}`, `{:object, _}`, schema module refs) must be provided as JSON strings:
+
+```elixir
+# env: %{"TAGS" => "[1,2,3]"}
+# decodes to [1, 2, 3]
+```
+
+Invalid JSON returns an `:env_json` error. Invalid scalar parsing returns an `:env_cast` error.
+
+Union decoding is conservative:
+
+- If the union contains structured members and the value starts with `{` or `[`, JSON decoding is attempted.
+- Otherwise the raw string is passed to the validator to resolve the union.
+
+## Nested Exploded Env Keys
+
+For nested schemas, the loader supports exploded env keys where the delimiter separates parent and child field names:
+
+```elixir
+# Schema: NestedSettings with a `database` field of type DatabaseSchema
+# DatabaseSchema has `host` and `pool_size` fields
+
+env = %{
+  "APP_DATABASE__HOST" => "localhost",
+  "APP_DATABASE__POOL_SIZE" => "10"
+}
+
+{:ok, settings} = Settings.load(NestedSettings,
+  env: env,
+  env_prefix: "APP_",
+  env_nested_delimiter: "__"
+)
+# settings.database.host == "localhost"
+# settings.database.pool_size == 10
+```
+
+When both a top-level JSON value and exploded keys exist for the same field, the exploded values are deep-merged over the JSON-decoded map, with exploded keys taking precedence:
+
+```elixir
+env = %{
+  "APP_DATABASE" => ~s({"host":"a","pool_size":5}),
+  "APP_DATABASE__POOL_SIZE" => "10"
+}
+# Result: host == "a", pool_size == 10
+```
+
+### Prefix-Based Matching for Underscore Fields
+
+When using `"_"` as the nested delimiter, field names containing underscores (e.g., `pool_size`) create ambiguity. The loader resolves this with a prefix-based matching strategy that sorts fields by name length (longest first), ensuring `POOL_SIZE` matches the `pool_size` field before `POOL` could match a hypothetical `pool` field.
+
+### Limitations
+
+Exploded addressing into arrays is not supported in v1. For example, `APP_ITEMS__0` will not set the first element of an `items` array field. Arrays must be provided as JSON strings.
 
 ## Key Normalization and Merge Semantics
 
 Settings loader performs:
 
 1. Env normalization (`case_sensitive` rules + collision checks)
-2. Field candidate key lookup
+2. Field candidate key lookup (override key first, then derived key)
 3. Decode + exploded nested decode merge
 4. Deep merge of env values with `input` (`input` wins)
 5. Key normalization by schema field definitions
 6. Final validation through `Exdantic.StructValidator`
+
+Case-insensitive mode (default) uppercases all env keys and detects collisions. If two env keys normalize to the same uppercase key (e.g., `app_port` and `APP_PORT`), an `:env_key_conflict` error is returned.
 
 ## When to Use Settings Loader
 

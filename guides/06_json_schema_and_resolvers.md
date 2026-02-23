@@ -49,7 +49,7 @@ Constraint mapping examples:
 
 `Exdantic.JsonSchema.ReferenceStore` tracks references and emitted definitions during generation.
 
-Generated schemas may contain `definitions` + `$ref` entries for nested schema modules.
+Generated schemas may contain `definitions` or `$defs` plus `$ref` entries for nested schema modules. The resolver supports both `definitions` and `$defs` keys and merges them when both are present.
 
 ## Computed Fields in JSON Schema
 
@@ -77,6 +77,31 @@ Example:
 resolved = Exdantic.JsonSchema.Resolver.resolve_references(schema, max_depth: 10)
 flattened = Exdantic.JsonSchema.Resolver.flatten_schema(schema, max_depth: 5)
 ```
+
+### Boolean Schema Support
+
+JSON Schema allows `true` and `false` as valid schemas (accept-all and reject-all). The resolver handles these correctly:
+
+- Boolean values in `definitions` or `$defs` are resolved as-is when referenced via `$ref`.
+- When metadata (title, description) needs to be merged into a boolean schema, the resolver wraps the result in an `allOf` structure to preserve schema validity:
+
+```elixir
+schema = %{
+  "type" => "object",
+  "properties" => %{
+    "allow_anything" => %{"$ref" => "#/definitions/AllowAll"},
+    "allow_nothing" => %{"$ref" => "#/$defs/DenyAll"}
+  },
+  "definitions" => %{"AllowAll" => true},
+  "$defs" => %{"DenyAll" => false}
+}
+
+resolved = Exdantic.JsonSchema.Resolver.resolve_references(schema)
+# resolved["properties"]["allow_anything"] == true
+# resolved["properties"]["allow_nothing"] == false
+```
+
+Both `resolve_references/2` and `flatten_schema/2` accept boolean schemas as top-level input and return them unchanged.
 
 ## Provider-Oriented Structured Output
 

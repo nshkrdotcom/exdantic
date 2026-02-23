@@ -203,6 +203,11 @@ normal validation:
   )
 ```
 
+Features include field-level env override (`extra: %{"env" => "DATABASE_URL"}`),
+typed scalar decoding, JSON decoding for structured types, nested exploded env keys,
+case-insensitive key normalization, and `input` map override with `input > env > defaults`
+precedence. See `guides/08_configuration_and_settings.md` for full details.
+
 ## Documentation Map
 
 The full guide set lives under `guides/` and is published in HexDocs:
@@ -229,6 +234,13 @@ Run examples with:
 mix run examples/basic_usage.exs
 mix run examples/model_validators.exs
 mix run examples/llm_integration.exs
+mix run examples/settings_loader.exs
+```
+
+Or run all examples at once:
+
+```bash
+bash examples/run_all.sh
 ```
 
 ## License

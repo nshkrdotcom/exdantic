@@ -136,6 +136,41 @@ resolved = Exdantic.JsonSchema.Resolver.resolve_references(schema)
 openai = Exdantic.JsonSchema.Resolver.enforce_structured_output(schema, provider: :openai)
 ```
 
+## Settings Quickstart
+
+Load schema-validated configuration from environment variables:
+
+```elixir
+defmodule AppSettings do
+  use Exdantic
+
+  schema do
+    field :host, :string, default: "localhost"
+    field :port, :integer, default: 4000
+    field :debug, :boolean, default: false
+  end
+end
+
+{:ok, settings} =
+  Exdantic.Settings.from_system_env(AppSettings,
+    env_prefix: "APP_",
+    env_nested_delimiter: "__"
+  )
+```
+
+Or test without touching the process environment:
+
+```elixir
+{:ok, settings} =
+  Exdantic.Settings.load(AppSettings,
+    env: %{"APP_PORT" => "8080", "APP_DEBUG" => "true"},
+    input: %{host: "0.0.0.0"}
+  )
+# settings.host == "0.0.0.0" (input wins over env)
+# settings.port == 8080
+# settings.debug == true
+```
+
 ## Choosing the Right API
 
 Use compile-time schema modules when:
@@ -154,6 +189,12 @@ Use `TypeAdapter` when:
 
 - You validate isolated values or fragments
 - You want minimal surface area and low ceremony
+
+Use `Settings` when:
+
+- You want schema-validated application configuration from env vars
+- You need typed coercion of env strings (integers, booleans, JSON)
+- You need nested config with controlled delimiter and prefixing
 
 ## Next Guides
 
