@@ -62,7 +62,7 @@ defmodule Exdantic.MixProject do
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url},
       maintainers: ["NSHkr"],
-      files: ~w(lib examples .formatter.exs mix.exs README* LICENSE* CHANGELOG*)
+      files: ~w(lib examples guides .formatter.exs mix.exs README* LICENSE* CHANGELOG*)
     ]
   end
 
@@ -71,14 +71,31 @@ defmodule Exdantic.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       source_url: @source_url,
+      logo: "assets/exdantic.svg",
+      assets: %{"assets" => "assets"},
       extras: [
-        {"README.md", [filename: "readme"]},
+        {"README.md", [filename: "readme", title: "Overview"]},
+        {"guides/01_overview_and_quickstart.md", [title: "01. Overview and Quickstart"]},
+        {"guides/02_schema_dsl_and_types.md", [title: "02. Schema DSL and Types"]},
+        {"guides/03_structs_model_validators_computed_fields.md",
+         [title: "03. Structs, Model Validators, and Computed Fields"]},
+        {"guides/04_runtime_schemas.md", [title: "04. Runtime Schemas"]},
+        {"guides/05_type_adapter_wrapper_root_schema.md",
+         [title: "05. TypeAdapter, Wrapper, and RootSchema"]},
+        {"guides/06_json_schema_and_resolvers.md", [title: "06. JSON Schema and Resolvers"]},
+        {"guides/07_llm_and_dspy_workflows.md", [title: "07. LLM and DSPy Workflows"]},
+        {"guides/08_configuration_and_settings.md", [title: "08. Configuration and Settings"]},
+        {"guides/09_errors_reports_and_operations.md",
+         [title: "09. Errors, Reports, and Operations"]},
+        {"CHANGELOG.md", [title: "Changelog"]},
         "LICENSE",
-        {"examples/README.md", [filename: "examples"]},
-        "GETTING_STARTED_GUIDE.md",
-        "ADVANCED_FEATURES_GUIDE.md",
-        "LLM_INTEGRATION_GUIDE.md",
-        "PRODUCTION_ERROR_HANDLING_GUIDE.md"
+        {"examples/README.md", [filename: "examples", title: "Examples Index"]}
+      ],
+      groups_for_extras: [
+        "Guides: Foundations": Path.wildcard("guides/0[1-3]_*.md"),
+        "Guides: Runtime and Schemas": Path.wildcard("guides/0[4-6]_*.md"),
+        "Guides: Integration and Ops": Path.wildcard("guides/0[7-9]_*.md"),
+        Project: ["README.md", "CHANGELOG.md", "LICENSE", "examples/README.md"]
       ]
     ]
   end
