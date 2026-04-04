@@ -62,7 +62,7 @@ defmodule Exdantic.MixProject do
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url},
       maintainers: ["NSHkr"],
-      files: ~w(lib examples guides .formatter.exs mix.exs README* LICENSE* CHANGELOG*)
+      files: ~w(lib assets examples guides .formatter.exs mix.exs README* LICENSE* CHANGELOG*)
     ]
   end
 
